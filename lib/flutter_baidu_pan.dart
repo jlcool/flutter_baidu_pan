@@ -20,22 +20,22 @@ import 'package:path/path.dart';
 /// 百度网盘
 class BaiduPan {
   Dio _dio = Dio();
-  BaiduPan() {
-    (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
-        (client) {
-      client.findProxy = (url) {
-        ///设置代理 电脑ip地址
-        return "PROXY 192.168.1.104:8888";
+  // BaiduPan() {
+  //   (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
+  //       (client) {
+  //     client.findProxy = (url) {
+  //       ///设置代理 电脑ip地址
+  //       return "PROXY 192.168.1.104:8888";
 
-        ///不设置代理
-        // return 'DIRECT';
-      };
+  //       ///不设置代理
+  //       // return 'DIRECT';
+  //     };
 
-      ///忽略证书
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-    };
-  }
+  //     ///忽略证书
+  //     client.badCertificateCallback =
+  //         (X509Certificate cert, String host, int port) => true;
+  //   };
+  // }
   //获取用户信息
   Future<BaiduPanUinfoResponse> uinfo(String token) async {
     String url =

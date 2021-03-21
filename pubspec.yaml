@@ -11,6 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  dio: ^3.0.10
+  url_launcher: ^5.1.2
 
 dev_dependencies:
   flutter_test:

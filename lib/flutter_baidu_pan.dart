@@ -1,18 +1,41 @@
 library flutter_baidu_pan;
 
+import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_baidu_pan/response/baidu_pan_multimedia_response.dart';
+import 'package:flutter_baidu_pan/response/baidu_pan_precreate_response.dart';
+import 'package:flutter_baidu_pan/response/baidu_pan_upload_response.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'response/baidu_pan_create_response.dart';
 import 'response/baidu_pan_list_response.dart';
 import 'response/baidu_pan_listall_response.dart';
 import 'response/baidu_pan_uinfo_response.dart';
+import 'package:path/path.dart';
 
 /// 百度网盘
 class BaiduPan {
   Dio _dio = Dio();
+  BaiduPan() {
+    (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
+        (client) {
+      client.findProxy = (url) {
+        ///设置代理 电脑ip地址
+        return "PROXY 192.168.1.104:8888";
+
+        ///不设置代理
+        // return 'DIRECT';
+      };
+
+      ///忽略证书
+      client.badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+    };
+  }
   //获取用户信息
   Future<BaiduPanUinfoResponse> uinfo(String token) async {
     String url =
@@ -137,5 +160,46 @@ class BaiduPan {
             headers: {"User-Agent": "pan.baidu.com"},
             responseType: ResponseType.bytes));
     return response.data;
+  }
+
+  ///预上传
+  Future<BaiduPanPrecreateResponse> precreate(
+      String token,String blockList, String savePath, int size) async {
+    var data =
+        'path=${Uri.encodeComponent(savePath)}&isdir=0&autoinit=1&size=$size&rtype=3&block_list=$blockList';
+    var result = await _dio.post(
+        "https://pan.baidu.com/rest/2.0/xpan/file?method=precreate&access_token=$token",
+        data: data);
+    return BaiduPanPrecreateResponse.fromJson(result.data);
+  }
+
+  //上传
+  Future<BaiduPanUploadResponse> upload(String token, 
+      String filePath, String savePath, int size, String uploadid) async {
+    FormData formData = new FormData.fromMap({
+      "file":
+          await MultipartFile.fromFile(filePath, filename: basename(filePath))
+    });
+
+    var result = await _dio.post(
+        "https://d.pcs.baidu.com/rest/2.0/pcs/superfile2?method=upload&access_token=$token&type=tmpfile&path=${Uri.encodeComponent(savePath)}&uploadid=$uploadid&partseq=0",
+        data: formData);
+    if (result.data is String) {
+      return BaiduPanUploadResponse.fromJson(jsonDecode(result.data));
+    }
+    return BaiduPanUploadResponse.fromJson(result.data);
+  }
+
+  //创建文件
+  Future<BaiduPanCreateResponse> create(String token,
+      String savePath, int size, List<String> blocks, String uploadid,
+      {int rtype = 1}) async {
+    var data =
+        "path=${Uri.encodeComponent(savePath)}&size=$size&isdir=0&rtype=$rtype&uploadid=$uploadid&block_list=%5B%22${blocks[0]}%22%5D";
+    var result = await _dio.post(
+        "https://pan.baidu.com/rest/2.0/xpan/file?method=create&access_token=$token",
+        data: data,
+        options: Options(headers: {"User-Agent": "pan.baidu.com"}));
+    return BaiduPanCreateResponse.fromJson(result.data);
   }
 }

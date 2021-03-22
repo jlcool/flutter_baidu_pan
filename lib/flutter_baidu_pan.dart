@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_baidu_pan/response/baidu_pan_multimedia_response.dart';
 import 'package:flutter_baidu_pan/response/baidu_pan_precreate_response.dart';
 import 'package:flutter_baidu_pan/response/baidu_pan_upload_response.dart';
@@ -164,9 +165,9 @@ class BaiduPan {
 
   ///预上传
   Future<BaiduPanPrecreateResponse> precreate(
-      String token,String blockList, String savePath, int size) async {
+      String token, String blockList, String savePath, int size) async {
     var data =
-        'path=${Uri.encodeComponent(savePath)}&isdir=0&autoinit=1&size=$size&rtype=3&block_list=$blockList';
+        'path=${Uri.encodeComponent(savePath)}&isdir=0&autoinit=1&size=$size&rtype=3&block_list=${Uri.encodeComponent(blockList)}';
     var result = await _dio.post(
         "https://pan.baidu.com/rest/2.0/xpan/file?method=precreate&access_token=$token",
         data: data);
@@ -174,11 +175,14 @@ class BaiduPan {
   }
 
   //上传
-  Future<BaiduPanUploadResponse> upload(String token, 
-      String filePath, String savePath, int size, String uploadid) async {
-    FormData formData = new FormData.fromMap({
-      "file":
-          await MultipartFile.fromFile(filePath, filename: basename(filePath))
+  Future<BaiduPanUploadResponse> upload(
+      String token, String savePath, int size, String uploadid,
+      {String filePath, List<int> bytes}) async {
+    assert(filePath != null || bytes != null);
+    FormData formData = FormData.fromMap({
+      "file": filePath == null
+          ? MultipartFile.fromBytes(bytes, filename: basename(savePath))
+          : await MultipartFile.fromFile(filePath, filename: basename(savePath))
     });
 
     var result = await _dio.post(
@@ -191,11 +195,11 @@ class BaiduPan {
   }
 
   //创建文件
-  Future<BaiduPanCreateResponse> create(String token,
-      String savePath, int size, List<String> blocks, String uploadid,
+  Future<BaiduPanCreateResponse> create(String token, String savePath, int size,
+      String blockList, String uploadid,
       {int rtype = 1}) async {
     var data =
-        "path=${Uri.encodeComponent(savePath)}&size=$size&isdir=0&rtype=$rtype&uploadid=$uploadid&block_list=%5B%22${blocks[0]}%22%5D";
+        "path=${Uri.encodeComponent(savePath)}&size=$size&isdir=0&rtype=$rtype&uploadid=$uploadid&block_list=${Uri.encodeComponent(blockList)}";
     var result = await _dio.post(
         "https://pan.baidu.com/rest/2.0/xpan/file?method=create&access_token=$token",
         data: data,

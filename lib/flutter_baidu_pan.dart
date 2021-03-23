@@ -142,9 +142,9 @@ class BaiduPan {
     return BaiduPanListAllResponse.fromJson(result.data);
   }
 
-  Future<BaiduPanMultimediaResponse> multimedia(String token, int fsid) async {
+  Future<BaiduPanMultimediaResponse> multimedia(String token, String fsid,{int dlink=1,int thumb=1}) async {
     var result = await _dio.get(
-        "https://pan.baidu.com/rest/2.0/xpan/multimedia?method=filemetas&fsids=[$fsid]&dlink=1&access_token=$token");
+        "https://pan.baidu.com/rest/2.0/xpan/multimedia?method=filemetas&fsids=[$fsid]&dlink=$dlink&thumb=$thumb&access_token=$token");
     return BaiduPanMultimediaResponse.fromJson(result.data);
   }
 

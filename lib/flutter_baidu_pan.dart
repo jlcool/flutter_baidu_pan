@@ -1,12 +1,8 @@
 library flutter_baidu_pan;
 
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
-
-import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_baidu_pan/response/baidu_pan_multimedia_response.dart';
 import 'package:flutter_baidu_pan/response/baidu_pan_precreate_response.dart';
 import 'package:flutter_baidu_pan/response/baidu_pan_upload_response.dart';
@@ -15,8 +11,12 @@ import 'package:url_launcher/url_launcher.dart';
 import 'response/baidu_pan_create_response.dart';
 import 'response/baidu_pan_list_response.dart';
 import 'response/baidu_pan_listall_response.dart';
+import 'response/baidu_pan_share_list_response.dart';
+import 'response/baidu_pan_share_set_response.dart';
 import 'response/baidu_pan_uinfo_response.dart';
 import 'package:path/path.dart';
+import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart';
 
 /// 百度网盘
 class BaiduPan {
@@ -37,6 +37,16 @@ class BaiduPan {
   //         (X509Certificate cert, String host, int port) => true;
   //   };
   // }
+  //签名
+  String _csign(String fidList, String thirdType, String secret,
+      {int schannel = 0}) {
+    var content =
+        new Utf8Encoder().convert('$thirdType$fidList$schannel$secret');
+    var digest = md5.convert(content);
+    // 这里其实就是 digest.toString()
+    return hex.encode(digest.bytes);
+  }
+
   //获取用户信息
   Future<BaiduPanUinfoResponse> uinfo(String token) async {
     String url =
@@ -98,9 +108,8 @@ class BaiduPan {
   ///获取文件列表
   ///recursion 是否递归
   ///https://pan.baidu.com/union/document/basic#%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E5%88%97%E8%A1%A8
-  Future<BaiduPanListAllResponse> listall(String token,
-      {String path,
-      String order,
+  Future<BaiduPanListAllResponse> listall(String token, String path,
+      {String order,
       String desc,
       int start,
       int limit,
@@ -133,7 +142,7 @@ class BaiduPan {
     if (mtime != null) {
       par += "&mtime=$mtime";
     }
-    if (par != null) {
+    if (web != null) {
       par += "&web=$web";
     }
     String url =
@@ -142,7 +151,8 @@ class BaiduPan {
     return BaiduPanListAllResponse.fromJson(result.data);
   }
 
-  Future<BaiduPanMultimediaResponse> multimedia(String token, String fsid,{int dlink=1,int thumb=1}) async {
+  Future<BaiduPanMultimediaResponse> multimedia(String token, String fsid,
+      {int dlink = 1, int thumb = 1}) async {
     var result = await _dio.get(
         "https://pan.baidu.com/rest/2.0/xpan/multimedia?method=filemetas&fsids=[$fsid]&dlink=$dlink&thumb=$thumb&access_token=$token");
     return BaiduPanMultimediaResponse.fromJson(result.data);
@@ -205,5 +215,46 @@ class BaiduPan {
         data: data,
         options: Options(headers: {"User-Agent": "pan.baidu.com"}));
     return BaiduPanCreateResponse.fromJson(result.data);
+  }
+
+  //创建分享
+  Future<BaiduPanShareSetResponse> shareSet(
+      String token, String fidList, int schannel, int period, int thirdType,
+      {String description = ""}) async {
+    var csign = _csign(fidList, '', '');
+    var data =
+        "fidList=${Uri.encodeComponent(fidList)}&schannel=$schannel&period=$period&thirdType=$thirdType&csign=$csign&description=$description";
+    var result = await _dio.post(
+        "https://pan.baidu.com/rest/2.0/xpan/share/set&access_token=$token",
+        data: data);
+    return BaiduPanShareSetResponse.fromJson(result.data);
+  }
+
+  //创建分享
+  Future<BaiduPanShareListResponse> shareList(
+      {int shareid,
+      int uk,
+      String shorturl,
+      int page,
+      int num,
+      int root,
+      int fid,
+      String sekey}) async {
+    assert((shareid != null && uk != null) || shorturl != null);
+    var querystring = {
+      "method": "list",
+      "shareid": shareid,
+      "uk": uk,
+      "shorturl":Uri.encodeComponent(shorturl),
+      "page": page,
+      "num": num,
+      "root": root,
+      "fid": fid,
+      "sekey": sekey
+    };
+
+    var result = await _dio.get("https://pan.baidu.com/rest/2.0/xpan/share",
+        queryParameters: querystring);
+    return BaiduPanShareListResponse.fromJson(result.data);
   }
 }

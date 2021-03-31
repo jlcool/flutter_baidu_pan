@@ -1,24 +1,16 @@
 class BaiduPanListAllResponse {
-  int cursor;
-  String errmsg;
   int errno;
-  int hasMore;
+  String guidInfo;
   List<FileList> fileList;
   String requestId;
+  int guid;
 
   BaiduPanListAllResponse(
-      {this.cursor,
-      this.errmsg,
-      this.errno,
-      this.hasMore,
-      this.fileList,
-      this.requestId});
+      {this.errno, this.guidInfo, this.fileList, this.requestId, this.guid});
 
   BaiduPanListAllResponse.fromJson(Map<String, dynamic> json) {
-    cursor = json['cursor'];
-    errmsg = json['errmsg'];
     errno = json['errno'];
-    hasMore = json['has_more'];
+    guidInfo = json['guid_info'];
     if (json['list'] != null) {
       fileList = new List<FileList>();
       json['list'].forEach((v) {
@@ -26,107 +18,132 @@ class BaiduPanListAllResponse {
       });
     }
     requestId = json['request_id'];
+    guid = json['guid'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['cursor'] = this.cursor;
-    data['errmsg'] = this.errmsg;
     data['errno'] = this.errno;
-    data['has_more'] = this.hasMore;
+    data['guid_info'] = this.guidInfo;
     if (this.fileList != null) {
       data['list'] = this.fileList.map((v) => v.toJson()).toList();
     }
     data['request_id'] = this.requestId;
+    data['guid'] = this.guid;
     return data;
   }
 }
 
 class FileList {
-  int category;
-  int fsId;
-  int isdir;
-  int localCtime;
-  int localMtime;
-  String md5;
-  String path;
-  int serverCtime;
   String serverFilename;
-  int serverMtime;
+  int privacy;
+  int category;
+  int unlist;
+  int fsId;
+  int dirEmpty;
+  int serverAtime;
+  int serverCtime;
+  int localMtime;
   int size;
+  int isdir;
+  int share;
+  String path;
+  int localCtime;
+  int serverMtime;
+  int empty;
+  int operId;
   Thumbs thumbs;
+  String md5;
 
   FileList(
-      {this.category,
+      {this.serverFilename,
+      this.privacy,
+      this.category,
+      this.unlist,
       this.fsId,
-      this.isdir,
-      this.localCtime,
-      this.localMtime,
-      this.md5,
-      this.path,
+      this.dirEmpty,
+      this.serverAtime,
       this.serverCtime,
-      this.serverFilename,
-      this.serverMtime,
+      this.localMtime,
       this.size,
-      this.thumbs});
+      this.isdir,
+      this.share,
+      this.path,
+      this.localCtime,
+      this.serverMtime,
+      this.empty,
+      this.operId,
+      this.thumbs,
+      this.md5});
 
   FileList.fromJson(Map<String, dynamic> json) {
-    category = json['category'];
-    fsId = json['fs_id'];
-    isdir = json['isdir'];
-    localCtime = json['local_ctime'];
-    localMtime = json['local_mtime'];
-    md5 = json['md5'];
-    path = json['path'];
-    serverCtime = json['server_ctime'];
     serverFilename = json['server_filename'];
-    serverMtime = json['server_mtime'];
+    privacy = json['privacy'];
+    category = json['category'];
+    unlist = json['unlist'];
+    fsId = json['fs_id'];
+    dirEmpty = json['dir_empty'];
+    serverAtime = json['server_atime'];
+    serverCtime = json['server_ctime'];
+    localMtime = json['local_mtime'];
     size = json['size'];
+    isdir = json['isdir'];
+    share = json['share'];
+    path = json['path'];
+    localCtime = json['local_ctime'];
+    serverMtime = json['server_mtime'];
+    empty = json['empty'];
+    operId = json['oper_id'];
     thumbs =
         json['thumbs'] != null ? new Thumbs.fromJson(json['thumbs']) : null;
+    md5 = json['md5'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['category'] = this.category;
-    data['fs_id'] = this.fsId;
-    data['isdir'] = this.isdir;
-    data['local_ctime'] = this.localCtime;
-    data['local_mtime'] = this.localMtime;
-    data['md5'] = this.md5;
-    data['path'] = this.path;
-    data['server_ctime'] = this.serverCtime;
     data['server_filename'] = this.serverFilename;
-    data['server_mtime'] = this.serverMtime;
+    data['privacy'] = this.privacy;
+    data['category'] = this.category;
+    data['unlist'] = this.unlist;
+    data['fs_id'] = this.fsId;
+    data['dir_empty'] = this.dirEmpty;
+    data['server_atime'] = this.serverAtime;
+    data['server_ctime'] = this.serverCtime;
+    data['local_mtime'] = this.localMtime;
     data['size'] = this.size;
+    data['isdir'] = this.isdir;
+    data['share'] = this.share;
+    data['path'] = this.path;
+    data['local_ctime'] = this.localCtime;
+    data['server_mtime'] = this.serverMtime;
+    data['empty'] = this.empty;
+    data['oper_id'] = this.operId;
     if (this.thumbs != null) {
       data['thumbs'] = this.thumbs.toJson();
     }
+    data['md5'] = this.md5;
     return data;
   }
 }
 
 class Thumbs {
-  String url1;
-  String url2;
   String url3;
-  String icon;
+  String url2;
+  String url1;
 
-  Thumbs({this.url1, this.url2, this.url3, this.icon});
+  Thumbs({this.url3, this.url2, this.url1});
 
   Thumbs.fromJson(Map<String, dynamic> json) {
-    url1 = json['url1'];
-    url2 = json['url2'];
     url3 = json['url3'];
-    icon = json['icon'];
+    url2 = json['url2'];
+    url1 = json['url1'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['url1'] = this.url1;
-    data['url2'] = this.url2;
     data['url3'] = this.url3;
-    data['icon'] = this.icon;
+    data['url2'] = this.url2;
+    data['url1'] = this.url1;
     return data;
   }
 }

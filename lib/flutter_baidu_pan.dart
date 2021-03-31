@@ -174,10 +174,15 @@ class BaiduPan {
   }
 
   ///预上传
+  ///rtype 文件命名策略，默认0
+  // 0 为不重命名，返回冲突
+  // 1 为只要path冲突即重命名
+  // 2 为path冲突且block_list不同才重命名
+  // 3 为覆盖
   Future<BaiduPanPrecreateResponse> precreate(
-      String token, String blockList, String savePath, int size) async {
+      String token, List<String> blockList, String savePath, int size,{isdir=0,rtype=0}) async {
     var data =
-        'path=${Uri.encodeComponent(savePath)}&isdir=0&autoinit=1&size=$size&rtype=3&block_list=${Uri.encodeComponent(blockList)}';
+        'path=${Uri.encodeComponent(savePath)}&isdir=$isdir&autoinit=1&size=$size&rtype=$rtype&block_list=${Uri.encodeComponent("[\"${blockList.join("\",\"")}\"]")}';
     var result = await _dio.post(
         "https://pan.baidu.com/rest/2.0/xpan/file?method=precreate&access_token=$token",
         data: data);
@@ -206,10 +211,10 @@ class BaiduPan {
 
   //创建文件
   Future<BaiduPanCreateResponse> create(String token, String savePath, int size,
-      String blockList, String uploadid,
+      List<String> blockList, String uploadid,
       {int rtype = 1}) async {
     var data =
-        "path=${Uri.encodeComponent(savePath)}&size=$size&isdir=0&rtype=$rtype&uploadid=$uploadid&block_list=${Uri.encodeComponent(blockList)}";
+        "path=${Uri.encodeComponent(savePath)}&size=$size&isdir=0&rtype=$rtype&uploadid=$uploadid&block_list=${Uri.encodeComponent("[\"${blockList.join("\",\"")}\"]")}";
     var result = await _dio.post(
         "https://pan.baidu.com/rest/2.0/xpan/file?method=create&access_token=$token",
         data: data,

@@ -214,7 +214,7 @@ class BaiduPan {
       List<String> blockList, String uploadid,
       {int rtype = 1}) async {
     var data =
-        "path=${Uri.encodeComponent(savePath)}&size=$size&isdir=0&rtype=$rtype&uploadid=$uploadid&block_list=${Uri.encodeComponent("[\"${blockList.join("\",\"")}\"]")}";
+        'path=${Uri.encodeComponent(savePath)}&size=$size&isdir=0&rtype=$rtype&uploadid=$uploadid&block_list=${Uri.encodeComponent("[\"${blockList.join("\",\"")}\"]")}';
     var result = await _dio.post(
         "https://pan.baidu.com/rest/2.0/xpan/file?method=create&access_token=$token",
         data: data,

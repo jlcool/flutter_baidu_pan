@@ -2,10 +2,14 @@ library flutter_baidu_pan;
 
 import 'dart:convert';
 import 'dart:typed_data';
+
+import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_baidu_pan/response/baidu_pan_multimedia_response.dart';
 import 'package:flutter_baidu_pan/response/baidu_pan_precreate_response.dart';
 import 'package:flutter_baidu_pan/response/baidu_pan_upload_response.dart';
+import 'package:path/path.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'response/baidu_pan_create_response.dart';
@@ -14,9 +18,6 @@ import 'response/baidu_pan_listall_response.dart';
 import 'response/baidu_pan_share_list_response.dart';
 import 'response/baidu_pan_share_set_response.dart';
 import 'response/baidu_pan_uinfo_response.dart';
-import 'package:path/path.dart';
-import 'package:convert/convert.dart';
-import 'package:crypto/crypto.dart';
 
 /// 百度网盘
 class BaiduPan {
@@ -180,7 +181,8 @@ class BaiduPan {
   // 2 为path冲突且block_list不同才重命名
   // 3 为覆盖
   Future<BaiduPanPrecreateResponse> precreate(
-      String token, List<String> blockList, String savePath, int size,{isdir=0,rtype=0}) async {
+      String token, List<String> blockList, String savePath, int size,
+      {isdir = 0, rtype = 0}) async {
     var data =
         'path=${Uri.encodeComponent(savePath)}&isdir=$isdir&autoinit=1&size=$size&rtype=$rtype&block_list=${Uri.encodeComponent("[\"${blockList.join("\",\"")}\"]")}';
     var result = await _dio.post(
@@ -201,7 +203,7 @@ class BaiduPan {
     });
 
     var result = await _dio.post(
-        "https://d.pcs.baidu.com/rest/2.0/pcs/superfile2?method=upload&access_token=$token&type=tmpfile&path=${Uri.encodeComponent(savePath)}&uploadid=$uploadid&partseq=0",
+        "https://c3.pcs.baidu.com/rest/2.0/pcs/superfile2?method=upload&access_token=$token&type=tmpfile&path=${Uri.encodeComponent(savePath)}&uploadid=$uploadid&partseq=0",
         data: formData);
     if (result.data is String) {
       return BaiduPanUploadResponse.fromJson(jsonDecode(result.data));
@@ -250,7 +252,7 @@ class BaiduPan {
       "method": "list",
       "shareid": shareid,
       "uk": uk,
-      "shorturl":Uri.encodeComponent(shorturl),
+      "shorturl": Uri.encodeComponent(shorturl),
       "page": page,
       "num": num,
       "root": root,

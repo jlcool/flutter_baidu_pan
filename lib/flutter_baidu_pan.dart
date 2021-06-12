@@ -106,6 +106,29 @@ class BaiduPan {
     return BaiduPanListResponse.fromJson(result.data);
   }
 
+  ///管理文件
+  ///https://pan.baidu.com/union/document/basic#%E7%AE%A1%E7%90%86%E6%96%87%E4%BB%B6
+  ///async 0:同步， 1 自适应，2异步
+  ///filelist
+  ///文件列表,
+  //copy/move:[{"path":"/测试目录/123456.docx","dest":"/测试目录/abc","newname":"11223.docx","ondup":"fail"}]
+  //rename:[{path":"/测试目录/123456.docx","newname":test.docx"}]
+  //delete:["/测试目录/123456.docx"]
+  //全局ondup,遇到重复文件的处理策略,
+  //fail(默认，直接返回失败)、newcopy(重命名文件)、overwrite、skip
+  Future<BaiduPanListResponse> fileManager(
+      String token, String opera, int async, Map<String, String> filelist,
+      {String ondup}) async {
+    var data = "async=$async&filelist=${jsonEncode(filelist)}";
+    if (ondup != null) {
+      data += "&ondup=$ondup";
+    }
+    String url =
+        "https://pan.baidu.com/rest/2.0/xpan/file?method=filemanager&access_token=$token&opera=$opera";
+    var result = await _dio.post(url, data: data);
+    return BaiduPanListResponse.fromJson(result.data);
+  }
+
   ///获取文件列表
   ///recursion 是否递归
   ///https://pan.baidu.com/union/document/basic#%E8%8E%B7%E5%8F%96%E6%96%87%E4%BB%B6%E5%88%97%E8%A1%A8

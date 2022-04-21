@@ -12,8 +12,8 @@ dependencies:
   flutter:
     sdk: flutter
   dio: ^4.0.6
-  url_launcher: ^5.1.2
-  crypto: ^2.1.5
+  url_launcher: ^6.0.20
+  crypto: ^3.0.1
 
 dev_dependencies:
   flutter_test:
